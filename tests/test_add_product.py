@@ -6,7 +6,7 @@ def test_create_Product(login, product):
     login.get_by_role("link", name="Add Products").click()
 
     # ---- Product name ----
-    product_name = "Test Product 01"
+    product_name = "Jasmin"
     login.get_by_placeholder("Enter name").fill(product_name)
 
     # ---- Category select ----
@@ -39,10 +39,9 @@ def test_create_Product(login, product):
     login.goto("https://dev.moinorrashid.com/products?limit=10&page=1")
     login.wait_for_timeout(2000)
 
-    product_in_list = login.get_by_text(product_name, exact=True)
+    product_in_list = login.get_by_text(product_name, exact=True).first
     expect(product_in_list).to_be_visible()
     print(f"✅ Product '{product_name}' সফলভাবে তৈরি হয়েছে এবং list এ দেখা যাচ্ছে!")
-
 # FAKER
 
 # def test_create_Product(login, product, fake, created_brand, created_category):
