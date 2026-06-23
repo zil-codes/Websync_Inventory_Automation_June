@@ -1,27 +1,35 @@
-from playwright.sync_api import Page, expect
+import pytest
+from playwright.sync_api import Page
+from pages.login_page import LoginPage  # underscore দিয়ে
 
-def test_login_valid_credential(login):
-    # login fixture already logged in, just assert dashboard
-    expect(login.get_by_role("heading", name="Dashboard")).to_be_visible()
-    login.wait_for_timeout(10000)
 
+# ──────────────────────────────────────────────
+# TC-001: Valid credential login
+# ──────────────────────────────────────────────
+def test_login_valid_credential(login: LoginPage):
+    # login fixture already logged in — just assert Dashboard
+    login.assert_dashboard_visible()
+    login.page.wait_for_timeout(10000)
+
+
+# ──────────────────────────────────────────────
+# TC-002: Invalid credential login
+# ──────────────────────────────────────────────
 def test_login_invalid_credential(page: Page):
-    page.goto("https://dev.moinorrashid.com/login")
-    page.locator("#email").fill("sm.trading.jess@gmail.com")
-    page.locator("#password").fill("wrongpassword")
-    page.get_by_role("button", name="Login").click()
-    expect(page.get_by_role("heading", name="Dashboard")).not_to_be_visible()
-    expect(page.get_by_text("Invalid email or password")).to_be_visible()
+    login_page = LoginPage(page)
+    login_page.navigate()
+    login_page.login("sm.trading.jess@gmail.com", "wrongpassword")
+
+    login_page.assert_dashboard_not_visible()
+    login_page.assert_error_message_visible()
     page.wait_for_timeout(10000)
 
-def test_login_logout(login):
-    login.locator("#user-menu-button-2").click()
-    login.get_by_role("button", name="Logout").click()
-    expect(login.get_by_role("heading", name="Sign In")).to_be_visible()
-    login.wait_for_timeout(10000)
 
-
-    # login fixture handles auth, so no page.goto(login) needed in valid credential and logout tests.
-    # Only the invalid credential test uses page directly since it needs a fresh unauthenticated session.
-
+# ──────────────────────────────────────────────
+# TC-003: Logout
+# ──────────────────────────────────────────────
+def test_login_logout(login: LoginPage):
+    login.logout()
+    login.assert_sign_in_visible()
+    login.page.wait_for_timeout(10000)
 
