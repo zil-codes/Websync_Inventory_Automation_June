@@ -55,3 +55,7 @@ def login(page: Page):
 @pytest.fixture
 def product():
     return "https://dev.moinorrashid.com/"
+
+@pytest.fixture
+def purchase():
+    return "https://dev.moinorrashid.com/"
