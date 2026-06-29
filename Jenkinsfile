@@ -1,3 +1,4 @@
+cat > Jenkinsfile << 'EOF'
 pipeline {
     agent any
 
@@ -48,14 +49,20 @@ pipeline {
     }
 
     post {
-        success {
-            echo 'All tests passed!'
-        }
-        failure {
-            echo 'Tests failed! Check Allure report.'
-        }
         always {
             echo 'Pipeline finished.'
+            allure([
+                includeProperties: false,
+                reportBuildPolicy: 'ALWAYS',
+                results: [[path: 'allure-results']]
+            ])
+        }
+        success {
+            echo '✅ All tests passed!'
+        }
+        failure {
+            echo '❌ Some tests failed. Check Allure report above.'
         }
     }
 }
+EOF
