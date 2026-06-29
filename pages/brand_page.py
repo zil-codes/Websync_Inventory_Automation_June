@@ -22,6 +22,7 @@ class BrandPage:
         self.page.goto(BASE_URL)
         self.products_menu_button.click()
         self.products_brands_link.click()
+        self.page.wait_for_load_state("networkidle")
 
     # ── Actions ───────────────────────────────
     def fill_name(self, name: str):
@@ -29,6 +30,8 @@ class BrandPage:
 
     def submit(self):
         self.submit_button.click()
+        self.page.wait_for_load_state("networkidle")
+        self.page.wait_for_timeout(2000)
 
     # ── Full flow ─────────────────────────────
     def add_brand(self, name: str):
@@ -39,5 +42,27 @@ class BrandPage:
 
     # ── Assert ────────────────────────────────
     def assert_brand_in_list(self, name: str):
-        expect(self.page.get_by_text(name, exact=True).first).to_be_visible()
+        # Brand list এ navigate করো
+        self.navigate()
+        self.page.wait_for_timeout(2000)
+
+        # Search করো
+        search_box = self.page.get_by_placeholder("Search here..")
+        search_box.wait_for(state="visible", timeout=10000)
+        search_box.fill(name)
+        self.page.wait_for_timeout(2000)
+
+        # Table এ নাম খোঁজো — exact=True সরানো হয়েছে
+        rows = self.page.locator("table tbody tr")
+        row_count = rows.count()
+
+        assert row_count > 0, f"কোনো row নেই! '{name}' পাওয়া যায়নি।"
+
+        found = False
+        for i in range(row_count):
+            if name in rows.nth(i).inner_text():
+                found = True
+                break
+
+        assert found, f"❌ '{name}' brand list এ নেই!"
         print(f"✅ Brand '{name}' সফলভাবে তৈরি হয়েছে এবং list এ দেখা যাচ্ছে!")

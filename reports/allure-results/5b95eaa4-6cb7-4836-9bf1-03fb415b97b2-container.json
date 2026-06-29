@@ -1,0 +1,1 @@
+{"uuid": "7eb928d8-47ae-4a61-b466-44889c7ddc5a", "children": ["9715b74b-92be-463e-a35e-eff51417b665"], "befores": [{"name": "_artifacts_recorder", "status": "passed", "start": 1782689168593, "stop": 1782689168594}], "afters": [{"name": "_artifacts_recorder::0", "status": "passed", "start": 1782689184627, "stop": 1782689184627}], "start": 1782689168593, "stop": 1782689184627}

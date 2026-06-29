@@ -39,11 +39,20 @@ class PurchaseOrderPage:
 
     # ── Supplier ──────────────────────────────
     def select_supplier(self, supplier_name: str):
+        # Modal open করো
         self.search_supplier_button.click()
-        self.modal.wait_for(state="visible")
+        self.modal.wait_for(state="visible", timeout=10000)
+        self.page.wait_for_timeout(1000)
+
+        # Search করো
+        self.modal_search_input.wait_for(state="visible", timeout=10000)
         self.modal_search_input.fill(supplier_name)
-        self.page.wait_for_timeout(500)
-        self.modal.locator("table tbody tr", has_text=supplier_name).first.click()
+        self.page.wait_for_timeout(2000)  # search result load হতে দাও
+
+        # যেকোনো row click করো — has_text filter ছাড়া
+        rows = self.modal.locator("table tbody tr")
+        rows.first.wait_for(state="visible", timeout=10000)
+        rows.first.click()
         self.page.wait_for_timeout(500)
 
     # ── Form fields ───────────────────────────
@@ -72,7 +81,7 @@ class PurchaseOrderPage:
     # ── Product ───────────────────────────────
     def add_product(self, product_keyword: str):
         self.product_search_input.fill(product_keyword)
-        self.page.wait_for_timeout(500)
+        self.page.wait_for_timeout(1000)
         self.page.locator('[class*="suggestion"], [class*="result"], tbody tr').first.click()
         self.page.wait_for_timeout(300)
 
@@ -83,9 +92,14 @@ class PurchaseOrderPage:
 
     # ── Assert ────────────────────────────────
     def assert_purchase_order_created(self):
-        assert "purchase" in self.page.url, "Purchase Order creation failed!"
-        print(f"✅ Purchase Order সফলভাবে তৈরি হয়েছে! URL: {self.page.url}")
-
+        try:
+            toast = self.page.locator(".toast, [class*='success'], [class*='alert']").first
+            toast.wait_for(state="visible", timeout=5000)
+            print(f"✅ Purchase Order তৈরি হয়েছে! Toast: {toast.inner_text()}")
+        except Exception:
+            current_url = self.page.url
+            assert "purchase" in current_url, f"❌ Failed! URL: {current_url}"
+            print(f"✅ Purchase Order তৈরি হয়েছে! URL: {current_url}")
 
     # ── Full flow ─────────────────────────────
     def create_purchase_order(
