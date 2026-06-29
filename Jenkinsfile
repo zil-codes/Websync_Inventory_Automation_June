@@ -3,6 +3,7 @@ pipeline {
 
     environment {
         PYTHONPATH = "${WORKSPACE}"
+        PATH = "/Users/zillurrahman/Library/Python/3.9/bin:/usr/local/bin:/usr/bin:/bin:${PATH}"
     }
 
     stages {
@@ -27,7 +28,7 @@ pipeline {
         stage('Run Tests') {
             steps {
                 sh '''
-                    pytest tests/ \
+                    python3 -m pytest tests/ \
                         --alluredir=allure-results \
                         -v \
                         --tb=short
