@@ -1,4 +1,3 @@
-cat > Jenkinsfile << 'EOF'
 pipeline {
     agent any
 
@@ -21,19 +20,20 @@ pipeline {
                 sh '''
                     python3 -m pip install --upgrade pip
                     pip3 install -r requirements.txt
-                    pip3 install allure-pytest
                 '''
             }
         }
 
         stage('Run Tests') {
             steps {
-                sh '''
-                    python3 -m pytest tests/ \
-                        --alluredir=allure-results \
-                        -v \
-                        --tb=short
-                '''
+                catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
+                    sh '''
+                        python3 -m pytest tests/ \
+                            --alluredir=allure-results \
+                            -v \
+                            --tb=short
+                    '''
+                }
             }
         }
 
@@ -51,18 +51,12 @@ pipeline {
     post {
         always {
             echo 'Pipeline finished.'
-            allure([
-                includeProperties: false,
-                reportBuildPolicy: 'ALWAYS',
-                results: [[path: 'allure-results']]
-            ])
         }
         success {
             echo '✅ All tests passed!'
         }
-        failure {
-            echo '❌ Some tests failed. Check Allure report above.'
+        unstable {
+            echo '⚠️ Some tests failed. Check Allure report.'
         }
     }
 }
-EOF
