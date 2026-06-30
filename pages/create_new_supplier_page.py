@@ -36,24 +36,24 @@ class SupplierPage:
 
         self.page.get_by_role("button", name="Submit").click()
         self.page.wait_for_load_state("networkidle")
-        self.page.wait_for_timeout(2000)
 
     # ── /customer/list এ assert করো ──────────
     def assert_supplier_in_list(self, name: str):
         self.page.goto(f"{BASE_URL}/customer/list")
         self.page.wait_for_load_state("networkidle")
-        self.page.wait_for_timeout(1000)
 
         # Search করো
         search_box = self.page.get_by_placeholder("Search here..")
         search_box.wait_for(state="visible", timeout=10000)
         search_box.fill(name)
-        self.page.wait_for_timeout(2000)
 
-        # Table এ নাম খোঁজো
+        # Table এ matching row আসা পর্যন্ত actively wait করো (fixed timeout নয়)
         rows = self.page.locator("table tbody tr")
-        row_count = rows.count()
+        matching_row = rows.filter(has_text=name)
 
+        expect(matching_row.first).to_be_visible(timeout=15000)
+
+        row_count = rows.count()
         assert row_count > 0, f"কোনো row নেই! '{name}' পাওয়া যায়নি।"
 
         found = False
