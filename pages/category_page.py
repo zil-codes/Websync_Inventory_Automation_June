@@ -20,8 +20,10 @@ class CategoryPage:
     # ── Navigate ──────────────────────────────
     def navigate(self):
         self.page.goto(BASE_URL)
+        self.page.wait_for_load_state("networkidle")
         self.products_menu_button.click()
         self.products_category_link.click()
+        self.page.wait_for_load_state("networkidle")
 
     # ── Actions ───────────────────────────────
     def fill_name(self, name: str):
@@ -29,6 +31,7 @@ class CategoryPage:
 
     def submit(self):
         self.submit_button.click()
+        self.page.wait_for_load_state("networkidle")
 
     # ── Full flow ─────────────────────────────
     def add_category(self, name: str):
@@ -39,5 +42,9 @@ class CategoryPage:
 
     # ── Assert ────────────────────────────────
     def assert_category_in_list(self, name: str):
-        expect(self.page.get_by_text(name, exact=True).first).to_be_visible()
+        # Submit এর পর backend response/list refresh সম্পূর্ণ হওয়া পর্যন্ত wait করো
+        self.page.wait_for_load_state("networkidle")
+
+        locator = self.page.get_by_text(name, exact=True).first
+        expect(locator).to_be_visible(timeout=15000)
         print(f"✅ Category '{name}' সফলভাবে তৈরি হয়েছে এবং list এ দেখা যাচ্ছে!")
