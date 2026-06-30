@@ -42,12 +42,16 @@ class CustomerPage:
         self.page.goto(f"{BASE_URL}/customer/list")
         self.page.wait_for_load_state("networkidle")
 
-        # Search করো
+        # Search box এ keystroke simulate করো (fill() React onChange trigger করে না)
         search_box = self.page.get_by_placeholder("Search here..")
         search_box.wait_for(state="visible", timeout=10000)
-        search_box.fill(name)
+        search_box.click()
+        search_box.press_sequentially(name, delay=80)
 
-        # Table এ matching row আসা পর্যন্ত actively wait করো (fixed timeout নয়)
+        # শেষ keystroke এর search API response সম্পূর্ণ হওয়া পর্যন্ত wait করো
+        self.page.wait_for_load_state("networkidle")
+
+        # Table এ matching row আসা পর্যন্ত actively wait করো
         rows = self.page.locator("table tbody tr")
         matching_row = rows.filter(has_text=name)
 
