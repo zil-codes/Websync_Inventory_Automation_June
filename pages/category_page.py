@@ -19,10 +19,7 @@ class CategoryPage:
 
     # ── Navigate ──────────────────────────────
     def navigate(self):
-        self.page.goto(BASE_URL)
-        self.page.wait_for_load_state("networkidle")
-        self.products_menu_button.click()
-        self.products_category_link.click()
+        self.page.goto(f"{BASE_URL}/products/category")
         self.page.wait_for_load_state("networkidle")
 
     # ── Actions ───────────────────────────────
@@ -30,7 +27,18 @@ class CategoryPage:
         self.name_input.fill(name)
 
     def submit(self):
-        self.submit_button.click()
+        # Category create API response actively capture করো
+        with self.page.expect_response(
+            lambda r: "/api/v1/cate" in r.url and r.request.method == "POST",
+            timeout=20000,
+        ) as resp_info:
+            self.submit_button.click()
+
+        resp = resp_info.value
+        assert resp.status in (200, 201), (
+            f"❌ Category create API failed! Status: {resp.status}, "
+            f"Body: {resp.text()}"
+        )
         self.page.wait_for_load_state("networkidle")
 
     # ── Full flow ─────────────────────────────
@@ -42,9 +50,20 @@ class CategoryPage:
 
     # ── Assert ────────────────────────────────
     def assert_category_in_list(self, name: str):
-        # Submit এর পর backend response/list refresh সম্পূর্ণ হওয়া পর্যন্ত wait করো
         self.page.wait_for_load_state("networkidle")
 
-        locator = self.page.get_by_text(name, exact=True).first
-        expect(locator).to_be_visible(timeout=15000)
+        # Search box দিয়ে filter করো — customer page এর মতো
+        search_box = self.page.get_by_placeholder("Search here..")
+        search_box.wait_for(state="visible", timeout=10000)
+        search_box.click()
+        search_box.press_sequentially(name, delay=80)
+
+        # Search API response আসা পর্যন্ত wait করো
+        self.page.wait_for_load_state("networkidle")
+
+        # Table row এ matching name খোঁজো
+        rows = self.page.locator("table tbody tr")
+        matching_row = rows.filter(has_text=name)
+        expect(matching_row.first).to_be_visible(timeout=15000)
+
         print(f"✅ Category '{name}' সফলভাবে তৈরি হয়েছে এবং list এ দেখা যাচ্ছে!")
