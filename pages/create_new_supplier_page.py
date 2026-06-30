@@ -34,7 +34,20 @@ class SupplierPage:
         self.page.get_by_placeholder("Enter postal code").fill(postal_code)
         self.page.get_by_placeholder("Enter customer type").fill(customer_type)
 
-        self.page.get_by_role("button", name="Submit").click()
+        # Create API response এর জন্য actively wait করো, শুধু networkidle না।
+        with self.page.expect_response(
+            lambda response: "/api/v1/customer" in response.url
+            and response.request.method == "POST",
+            timeout=20000,
+        ) as response_info:
+            self.page.get_by_role("button", name="Submit").click()
+
+        response = response_info.value
+        assert response.status in (200, 201), (
+            f"❌ Create Supplier API ব্যর্থ হয়েছে! Status: {response.status}, "
+            f"URL: {response.url}, Body: {response.text()}"
+        )
+
         self.page.wait_for_load_state("networkidle")
 
     # ── /customer/list এ assert করো ──────────
@@ -42,16 +55,13 @@ class SupplierPage:
         self.page.goto(f"{BASE_URL}/customer/list")
         self.page.wait_for_load_state("networkidle")
 
-        # Search box এ keystroke simulate করো (fill() React onChange trigger করে না)
         search_box = self.page.get_by_placeholder("Search here..")
         search_box.wait_for(state="visible", timeout=10000)
         search_box.click()
         search_box.press_sequentially(name, delay=80)
 
-        # শেষ keystroke এর search API response সম্পূর্ণ হওয়া পর্যন্ত wait করো
         self.page.wait_for_load_state("networkidle")
 
-        # Table এ matching row আসা পর্যন্ত actively wait করো
         rows = self.page.locator("table tbody tr")
         matching_row = rows.filter(has_text=name)
 
