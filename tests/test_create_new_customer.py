@@ -9,7 +9,7 @@ def test_New_Customer(login: LoginPage):
     customer_name = f"Xman {unique_suffix}"
     customer_page.create_supplier(
         name=customer_name,
-        phone="01712345634",
+        phone=f"017{str(unique_suffix)[-8:]}",
         email=f"man{unique_suffix}@gmail.com",
         address="National park 201",
         city="Nevada",

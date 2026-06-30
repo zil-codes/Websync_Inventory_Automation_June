@@ -3,16 +3,13 @@ from pages.login_page import LoginPage
 from pages.create_new_supplier_page import SupplierPage
 
 
-# ══════════════════════════════════════════════
-# TC-001: Static data দিয়ে supplier create
-# ══════════════════════════════════════════════
 def test_New_Supplier(login: LoginPage):
     supplier_page = SupplierPage(login.page)
     unique_suffix = int(time.time())
     supplier_name = f"Bindon {unique_suffix}"
     supplier_page.create_supplier(
         name=supplier_name,
-        phone="01712145678",
+        phone=f"018{str(unique_suffix)[-8:]}",
         email=f"bin{unique_suffix}@gmail.com",
         address="National park 201",
         city="Nevada",
@@ -23,9 +20,6 @@ def test_New_Supplier(login: LoginPage):
     login.page.wait_for_timeout(3000)
 
 
-# ══════════════════════════════════════════════
-# TC-002: Faker দিয়ে dynamic supplier create
-# ══════════════════════════════════════════════
 def test_New_Supplier_faker(login: LoginPage, purchase: str, fake):
     supplier_page = SupplierPage(login.page)
     supplier_name = fake.name()
