@@ -5,7 +5,7 @@ from pages.category_page import CategoryPage
 
 def test_add_category(login: LoginPage, product: str):
     category_page = CategoryPage(login.page)
-    category_name = f"BananaRepublic_{int(time.time())}"
+    category_name = f"poloboy_{int(time.time())}"
     category_page.add_category(category_name)
     login.page.wait_for_timeout(10000)
     category_page.assert_category_in_list(category_name)

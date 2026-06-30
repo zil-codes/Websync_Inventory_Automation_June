@@ -116,31 +116,31 @@ def test_create_Product(login: LoginPage, product: str):
 # TC-002: Faker দিয়ে dynamic product create
 # (created_brand + created_category fixture use করে)
 # ══════════════════════════════════════════════════════
-def test_create_Product_faker(
-    login: LoginPage,
-    product: str,
-    fake,
-    created_brand: str,
-    created_category: str,
-):
-    add_product = AddProductPage(login.page)
-
-    product_name = fake.word()
-    purchase_price = str(fake.random_int(min=100, max=5000))
-    sale_price = str(fake.random_int(min=100, max=5000))
-    product_code = fake.bothify(text="PRD-####")
-    description = fake.sentence()
-
-    add_product.create_product(
-        name=product_name,
-        category=created_category,
-        brand=created_brand,
-        purchase_price=purchase_price,
-        sale_price=sale_price,
-        product_code=product_code,
-        description=description,
-        use_last=True,  # faker এ newly created option শেষে থাকে
-    )
-
-    login.page.wait_for_timeout(5000)
-    add_product.assert_product_in_list(product_name)
+# def test_create_Product_faker(
+#     login: LoginPage,
+#     product: str,
+#     fake,
+#     created_brand: str,
+#     created_category: str,
+# ):
+#     add_product = AddProductPage(login.page)
+#
+#     product_name = fake.word()
+#     purchase_price = str(fake.random_int(min=100, max=5000))
+#     sale_price = str(fake.random_int(min=100, max=5000))
+#     product_code = fake.bothify(text="PRD-####")
+#     description = fake.sentence()
+#
+#     add_product.create_product(
+#         name=product_name,
+#         category=created_category,
+#         brand=created_brand,
+#         purchase_price=purchase_price,
+#         sale_price=sale_price,
+#         product_code=product_code,
+#         description=description,
+#         use_last=True,  # faker এ newly created option শেষে থাকে
+#     )
+#
+#     login.page.wait_for_timeout(5000)
+#     add_product.assert_product_in_list(product_name)

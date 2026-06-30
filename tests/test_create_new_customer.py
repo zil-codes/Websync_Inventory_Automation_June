@@ -6,11 +6,11 @@ from pages.create_new_customer_page import CustomerPage
 def test_New_Customer(login: LoginPage):
     customer_page = CustomerPage(login.page)
     unique_suffix = int(time.time())
-    customer_name = f"Troy Moly {unique_suffix}"
+    customer_name = f"Xman {unique_suffix}"
     customer_page.create_supplier(
         name=customer_name,
         phone="01712345634",
-        email=f"troy{unique_suffix}@gmail.com",
+        email=f"man{unique_suffix}@gmail.com",
         address="National park 201",
         city="Nevada",
         postal_code="90006",

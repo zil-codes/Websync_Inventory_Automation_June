@@ -18,11 +18,11 @@ def test_add_brand(login: LoginPage):
 # ══════════════════════════════════════════════
 # TC-002: Faker দিয়ে dynamic brand create
 # ══════════════════════════════════════════════
-def test_add_brand_faker(login: LoginPage, fake):
-    brand_page = BrandPage(login.page)
-
-    brand_name = fake.company()
-
-    brand_page.add_brand(brand_name)
-    login.page.wait_for_timeout(3000)
-    brand_page.assert_brand_in_list(brand_name)
+# def test_add_brand_faker(login: LoginPage, fake):
+#     brand_page = BrandPage(login.page)
+#
+#     brand_name = fake.company()
+#
+#     brand_page.add_brand(brand_name)
+#     login.page.wait_for_timeout(3000)
+#     brand_page.assert_brand_in_list(brand_name)

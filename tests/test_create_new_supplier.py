@@ -9,11 +9,11 @@ from pages.create_new_supplier_page import SupplierPage
 def test_New_Supplier(login: LoginPage):
     supplier_page = SupplierPage(login.page)
     unique_suffix = int(time.time())
-    supplier_name = f"Monika {unique_suffix}"
+    supplier_name = f"Bindon {unique_suffix}"
     supplier_page.create_supplier(
         name=supplier_name,
         phone="01712145678",
-        email=f"monika{unique_suffix}@gmail.com",
+        email=f"bin{unique_suffix}@gmail.com",
         address="National park 201",
         city="Nevada",
         postal_code="90006",
