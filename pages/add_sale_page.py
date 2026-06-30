@@ -20,7 +20,7 @@ class AddSalePage:
         # ── Form fields ──
         self.invoice_number_input = page.locator('input[name="invoiceNumber"]')
         self.payment_date_input = page.locator('input[name="paymentDate"]')
-        self.sale_date_input = page.locator('input[name="saleDate"]')       # ✅ confirmed
+        self.sale_date_input = page.locator('input[name="saleDate"]')
         self.product_search_input = page.locator('input[placeholder="Search by product name..."]')
         self.discount_input = page.locator('input[type="number"]').nth(0)
         self.tax_input = page.locator('input[type="number"]').nth(1)
@@ -43,22 +43,33 @@ class AddSalePage:
     # ── Customer select ───────────────────────
     def select_customer(self, customer_name: str):
         self.search_customer_button.click()
-        self.modal.wait_for(state="visible")
+        self.modal.wait_for(state="visible", timeout=10000)
+        self.modal_search_input.wait_for(state="visible", timeout=10000)
+        self.modal_search_input.click()
+
+        # fill() + dispatch_event দিয়ে React onChange trigger করো
         self.modal_search_input.fill(customer_name)
-        self.page.wait_for_timeout(500)
-        self.modal.locator("table tbody tr", has_text=customer_name).first.click()
-        self.page.wait_for_timeout(500)
+        self.modal_search_input.dispatch_event("input")
+        self.modal_search_input.dispatch_event("change")
+
+        # Search API response আসা পর্যন্ত wait করো
+        self.page.wait_for_load_state("networkidle")
+        self.page.wait_for_timeout(1000)
+
+        # Matching row visible হওয়া পর্যন্ত wait করো তারপর click
+        matching_row = self.modal.locator("table tbody tr").filter(has_text=customer_name)
+        expect(matching_row.first).to_be_visible(timeout=15000)
+        matching_row.first.click()
+        self.page.wait_for_load_state("networkidle")
 
     # ── Form fill methods ─────────────────────
     def fill_invoice_number(self, invoice: str):
         self.invoice_number_input.fill(invoice)
 
     def fill_payment_date(self, date: str):
-        """date format: YYYY-MM-DD"""
         self.payment_date_input.fill(date)
 
     def fill_sale_date(self, date: str):
-        """date format: YYYY-MM-DD"""
         self.sale_date_input.fill(date)
 
     def fill_discount(self, discount: str):
@@ -68,7 +79,7 @@ class AddSalePage:
         self.tax_input.fill(tax)
 
     def fill_receive_amount(self, amount: str):
-        self.receive_amount_input.wait_for(state="visible", timeout=5000)
+        self.receive_amount_input.wait_for(state="visible", timeout=10000)
         self.receive_amount_input.fill(amount)
 
     # ── Dropdowns ─────────────────────────────
@@ -84,21 +95,23 @@ class AddSalePage:
 
     # ── Product ───────────────────────────────
     def add_product(self, product_keyword: str):
-        self.product_search_input.fill(product_keyword)
-        self.page.wait_for_timeout(1000)
-        # Table এ "Add" button click করো
+        self.product_search_input.click()
+        self.product_search_input.press_sequentially(product_keyword, delay=80)
+        self.page.wait_for_load_state("networkidle")
         self.page.locator("table tbody tr").first.get_by_role("button", name="Add").click()
         self.page.wait_for_timeout(500)
 
     # ── Submit ────────────────────────────────
     def submit(self):
         self.submit_button.click()
-        self.page.wait_for_timeout(2000)
+        self.page.wait_for_load_state("networkidle")
 
     # ── Assert ────────────────────────────────
     def assert_sale_order_created(self):
         try:
-            toast = self.page.locator(".toast, [class*='success'], [class*='alert']").first
+            toast = self.page.locator(
+                ".toast, [class*='success'], [class*='alert']"
+            ).first
             toast.wait_for(state="visible", timeout=5000)
             print(f"✅ Sale Order তৈরি হয়েছে! Toast: {toast.inner_text()}")
         except Exception:
